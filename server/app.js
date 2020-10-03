@@ -1,5 +1,24 @@
 const axios = require('axios');
+const express = require('express');
 
+const app = express();
+const port = 3006;
+
+app.listen(port, () => {
+  console.log(`\nExample app listening on port ${port}!\n`);
+});
+
+app.get('/getuser', handleGetUser);
+
+function handleGetUser(request, response){
+  console.log('node handling request from web client', request)
+  // TODO replace json with function call twitter API from lennart 
+  response.json({ username: 'Flavio' })
+}
+
+
+
+/*
 const bearerToken = process.env.TWITTER_BEARER_TOKEN;
 const twitterHandle = "lennartblom";
 const requestConfig = {'headers': {
@@ -22,3 +41,5 @@ axios.get(twitterApiUrl, requestConfig)
   .catch(error => {
     console.log(error);
   });
+  
+*/
