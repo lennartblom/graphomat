@@ -1,21 +1,23 @@
-const axios = require('axios');
 const express = require('express');
+const cors = require('cors')
+const app = express()
 
-const app = express();
+app.use(cors())
+// app.options('*', cors()) // include before other routes
+
 const port = 3006;
-
-app.listen(port, () => {
-  console.log(`\nExample app listening on port ${port}!\n`);
-});
 
 app.get('/getuser', handleGetUser);
 
 function handleGetUser(request, response){
-  console.log('node handling request from web client', request)
+  console.log('node handling request from web client')
   // TODO replace json with function call twitter API from lennart 
   response.json({ username: 'Flavio' })
 }
 
+app.listen(port, () => {
+  console.log(`\nExample app listening on port ${port}!\n`);
+});
 
 
 /*

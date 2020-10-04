@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/lennartblom/graphomat#readme",
   "dependencies": {
-    "axios": "^0.20.0"
+    "axios": "^0.20.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1"
   }
 }

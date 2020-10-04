@@ -9,20 +9,21 @@ document.getElementById('twitter-handle-btn').addEventListener('click', (event) 
     console.log('ok cool')
     console.log('click', event)
 
-    axios.get('https://randomuser.me/api/', {
+    axios.get('http://localhost:3006/getuser', {
         headers: {
             'Access-Control-Allow-Origin': '*',
-            //'Access-Control-Allow-Methods' : 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+            // 'Access-Control-Allow-Methods' : 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
         },
     })
         .then(response => {
+            console.log('lolol');
             console.log(response);
         })
         .catch(error => {
             console.log(error);
         });
 
-    getUser()
+    //getUser()
 
 })
 
