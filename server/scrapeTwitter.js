@@ -9,46 +9,48 @@ const requestConfig = {'headers': {
     }
 }
 
-let twitterApiUrl = `https://api.twitter.com/1.1/followers/list.json?cursor=-1&screen_name=${twitterHandle}&skip_status=true&include_user_entities=false`;
+function buildTwitterApiRequestUrl(screenName) {
+    return `https://api.twitter.com/1.1/followers/list.json?cursor=-1&screen_name=${screenName}&skip_status=true&include_user_entities=false`;
+}
+
+let twitterApiUrl = buildTwitterApiRequestUrl(twitterHandle);
 
 let screenNamesToScratch = [];
 
-// TODO should be converted into async await functions
-axios.get(twitterApiUrl, requestConfig)
-    .then(response => {
+
+async function scrapeAndPersistTwitterFollowers(follower) {
+    let followerApiUrl = buildTwitterApiRequestUrl(follower)
+
+    const levelTwoResponse = await axios.get(followerApiUrl, requestConfig);
+    console.log("Collecting followers from @", follower);
+    let secondLevelScreenNames = [];
+
+    for (const user of levelTwoResponse.data.users) {
+        console.log("Twitter Follower on layer two found @", user.screen_name);
+        secondLevelScreenNames.push(user.screen_name);
+    }
+    console.log("Trying to write relations from @", follower, "to his/her follower", secondLevelScreenNames);
+    await startDbConnectivity(follower, secondLevelScreenNames, false);
+}
+
+(async () => {
+    try {
+        console.log('Start scraping Twitter API');
+        const response = await axios.get(twitterApiUrl, requestConfig);
+
         for (const user of response.data.users) {
+            console.log("Twitter Follower found @", user.screen_name);
             screenNamesToScratch.push(user.screen_name);
         }
 
         console.log("Trying to write relations from @", twitterHandle, "to his/her follower", screenNamesToScratch);
-        startDbConnectivity(twitterHandle, screenNamesToScratch, true).then(r => {
+        await startDbConnectivity(twitterHandle, screenNamesToScratch, true);
 
-            for (const follower of screenNamesToScratch) {
-                let followerApiUrl = `https://api.twitter.com/1.1/followers/list.json?cursor=-1&screen_name=${follower}&skip_status=true&include_user_entities=false`;
+        for (const follower of screenNamesToScratch) {
+            await scrapeAndPersistTwitterFollowers(follower);
+        }
 
-
-                axios.get(followerApiUrl, requestConfig)
-                    .then(response => {
-                        console.log("collection followers from @", follower);
-                        let secondLevelScreenNames = [];
-
-                        for (const user of response.data.users) {
-                            secondLevelScreenNames.push(user.screen_name);
-                        }
-                        console.log("Trying to write relations from @", follower, "to his/her follower", secondLevelScreenNames);
-                        startDbConnectivity(follower, secondLevelScreenNames, false).then(r => {
-                            console.log("Scratch follower of @", follower, "finished")
-                        });
-
-                    })
-                    .catch(error => {
-                        console.log("Unable to request followers from @", follower);
-                        console.log(error);
-                    });
-            }
-        });
-
-    })
-    .catch(error => {
-        console.log("Initial twitter API request did not work out", error);
-    });
+    } catch (error) {
+        console.log(error);
+    }
+})();

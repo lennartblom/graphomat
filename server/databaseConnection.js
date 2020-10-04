@@ -6,26 +6,39 @@ async function startDbConnectivity(username, followers, createInitialUsername) {
     const session = driver.session()
     try {
         if(createInitialUsername) {
-            const resultUsernameCreation = await session.run(
-                'CREATE (a:Person {name: $name}) RETURN a',
-                {name: username}
-            )
+            try {
+                const resultUsernameCreation = await session.run(
+                    'CREATE (a:Person {name: $name}) RETURN a',
+                    {name: username}
+                )
+            } catch (error) {
+                console.log(error);
+            }
         }
 
 
         for(const follower of followers) {
-            const resultFollowerCreation = await session.run(
-                'CREATE (a:Person {name: $name}) RETURN a',
-                {name: follower}
-            )
+            try {
+                const resultFollowerCreation = await session.run(
+                    'CREATE (a:Person {name: $name}) RETURN a',
+                    {name: follower}
+                )
+            } catch (error) {
+                console.log(error);
+            }
 
-            const resultFollowerRelationShip = await session.run(
-                'MATCH (a:Person),(b:Person)\n' +
-                'WHERE a.name = $username AND b.name = $follower\n' +
-                'CREATE (b)-[r:RELTYPE { name: \' follows \' }]->(a)\n' +
-                'RETURN type(r)',
-                {username: username, follower: follower}
-            )
+
+            try {
+                const resultFollowerRelationShip = await session.run(
+                    'MATCH (a:Person),(b:Person)\n' +
+                    'WHERE a.name = $username AND b.name = $follower\n' +
+                    'CREATE (b)-[r:RELTYPE { name: \' follows \' }]->(a)\n' +
+                    'RETURN type(r)',
+                    {username: username, follower: follower}
+                )
+            } catch (error) {
+                console.log(error);
+            }
         }
 
     } finally {
